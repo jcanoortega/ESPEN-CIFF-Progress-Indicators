@@ -590,9 +590,7 @@ const SHORT_LABELS = {
 };
 
 function shortLabel(key) {
-  const label = SHORT_LABELS[key] || key.replace('Indicator_', 'Ind. ');
-  const num   = key.replace('Indicator_', '');
-  return `${label}<span class="th-tooltip">Ind. ${num}</span>`;
+  return SHORT_LABELS[key] || key.replace('Indicator_', 'Ind. ');
 }
 
 function getMapColor(score) {
@@ -913,9 +911,9 @@ function renderCrossCutting(id, year, country) {
   const ccInds = ['Indicator_33','Indicator_34','Indicator_35'];
 
   const th = `
-    <th>Integrated Treatment Coverage Index (ITCI)<span class="th-tooltip">Ind. 33</span></th>
-    <th>ITCI Band<span class="th-tooltip">Ind. 34</span></th>
-    <th>Eliminated PC-NTDs (n)<span class="th-tooltip">Ind. 35</span></th>`;
+    <th>Integrated Treatment Coverage Index (ITCI)</th>
+    <th>ITCI Band</th>
+    <th>Eliminated PC-NTDs (n)</th>`;
 
   const tbodyRows = rows.map(r => `
     <tr>
