@@ -947,8 +947,13 @@ function renderSysInteg(id, country) {
 
   const countryNames = [...new Set(filtered.map(r => r.Country))].sort();
 
-  const ths2024 = qs.map(q => `<th title="${q.text}">Q${q.q}<span class="th-tooltip">2024</span></th>`).join('');
-  const ths2025 = qs.map(q => `<th title="${q.text}">Q${q.q}<span class="th-tooltip">2025</span></th>`).join('');
+  const Q_LABELS = {
+    '1': 'NTDs in Essential Health Services',
+    '2': 'NTD Budget Allocation',
+    '3': 'NTD Reporting in NHIS (e.g. DHIS2)',
+  };
+  const ths2024 = qs.map(q => `<th title="${q.text}">${Q_LABELS[q.q] || 'Q'+q.q}</th>`).join('');
+  const ths2025 = qs.map(q => `<th title="${q.text}">${Q_LABELS[q.q] || 'Q'+q.q}</th>`).join('');
 
   const tbodyRows = countryNames.map(cn => {
     const r24 = byCountry[cn]?.[2024] || {};
@@ -960,7 +965,7 @@ function renderSysInteg(id, country) {
 
   const qLegend = qs.map(q => `
     <tr>
-      <td class="fw-600">Q${q.q}</td>
+      <td class="fw-600">${Q_LABELS[q.q] || 'Q'+q.q}</td>
       <td style="color:#555;">${q.text}</td>
     </tr>`).join('');
 
