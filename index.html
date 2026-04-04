@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ESPEN–CIFF PCT Progress Indicators</title>
+
+  <!-- Bootstrap 5.3 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+  <!-- Leaflet 1.9 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+
+  <style>
+    /* ── Base ─────────────────────────────────────────────────────────────── */
+    :root {
+      --who-blue:      #009FE3;
+      --who-dark:      #004580;
+      --espen-blue:    #1A4D8F;
+      --card-radius:   8px;
+      --lf-color:      #1a5276;
+      --oncho-color:   #196f3d;
+      --sth-color:     #7d6608;
+      --sch-color:     #6e2f0c;
+      --tra-color:     #6c3483;
+      --cc-color:      #1b2631;
+    }
+
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      font-size: 0.875rem;
+      background: #f4f6f9;
+      color: #222;
+    }
+
+    /* ── Header ──────────────────────────────────────────────────────────── */
+    #site-header {
+      background: var(--who-dark);
+      color: #fff;
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,.25);
+    }
+    #site-header .header-logo {
+      height: 52px;
+      width: auto;
+      object-fit: contain;
+      background: #fff;
+      border-radius: 4px;
+      padding: 3px 6px;
+    }
+    #site-header .header-divider { flex: 1; }
+    #site-header .header-title { text-align: center; }
+    #site-header .header-title h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin: 0;
+      letter-spacing: .3px;
+    }
+    #site-header .header-title p {
+      margin: 0;
+      font-size: 0.78rem;
+      opacity: .85;
+    }
+
+    /* ── Nav tabs ─────────────────────────────────────────────────────────── */
+    #main-nav {
+      background: #fff;
+      border-bottom: 2px solid var(--who-blue);
+      padding: 0 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    #main-nav .nav-link {
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 0.65rem 0.9rem;
+      border-radius: 0;
+      color: #555;
+      border-bottom: 3px solid transparent;
+    }
+    #main-nav .nav-link.active {
+      color: var(--who-dark);
+      border-bottom-color: var(--who-blue);
+      background: transparent;
+    }
+    #main-nav .nav-link:hover:not(.active) {
+      color: var(--who-blue);
+      background: #f0f7ff;
+    }
+
+    /* ── Layout ──────────────────────────────────────────────────────────── */
+    .tab-container { padding: 1.25rem 1.5rem; }
+
+    /* ── Filter bar ──────────────────────────────────────────────────────── */
+    .filter-bar {
+      background: #fff;
+      border: 1px solid #dde3ea;
+      border-radius: var(--card-radius);
+      padding: .6rem 1rem;
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    .filter-bar label { font-weight: 600; font-size: 0.8rem; color: #444; margin: 0; }
+    .filter-bar select {
+      font-size: 0.82rem;
+      border: 1px solid #c8d0d9;
+      border-radius: 5px;
+      padding: 0.3rem 0.6rem;
+      background: #fafbfc;
+    }
+
+    /* ── Metric cards (regional) ─────────────────────────────────────────── */
+    .disease-section { margin-bottom: 1.5rem; }
+    .disease-section-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .7px;
+      color: #fff;
+      padding: .25rem .75rem;
+      border-radius: 5px 5px 0 0;
+      margin-bottom: 0;
+    }
+    .metric-card {
+      background: #fff;
+      border: 1px solid #dde3ea;
+      border-radius: var(--card-radius);
+      padding: .75rem 1rem;
+      height: 100%;
+    }
+    .metric-card .metric-label {
+      font-size: 0.75rem;
+      color: #666;
+      margin-bottom: .25rem;
+      line-height: 1.3;
+    }
+    .metric-card .metric-value {
+      font-size: 1.4rem;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: .1rem;
+    }
+    .metric-card .metric-unit {
+      font-size: 0.7rem;
+      color: #888;
+    }
+    .metric-card .mini-trend {
+      margin-top: .4rem;
+    }
+
+    /* ── Data tables ─────────────────────────────────────────────────────── */
+    .section-card {
+      background: #fff;
+      border: 1px solid #dde3ea;
+      border-radius: var(--card-radius);
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+    .section-card .section-head {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      padding: .45rem .9rem;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+    }
+    .section-card .section-body { overflow-x: auto; }
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+    table.data-table thead tr {
+      background: #f0f4f8;
+    }
+    table.data-table th {
+      padding: .45rem .65rem;
+      font-weight: 600;
+      color: #333;
+      border-bottom: 2px solid #dde3ea;
+      white-space: nowrap;
+      text-align: center;
+    }
+    table.data-table th:first-child { text-align: left; }
+    table.data-table td {
+      padding: .4rem .65rem;
+      border-bottom: 1px solid #eef1f5;
+      text-align: center;
+      white-space: nowrap;
+    }
+    table.data-table td:first-child { text-align: left; font-weight: 500; }
+    table.data-table tbody tr:hover { background: #f7f9fc; }
+    table.data-table .na-cell { color: #aaa; font-style: italic; }
+    table.data-table .th-tooltip {
+      display: block;
+      font-size: 0.7rem;
+      color: #888;
+      font-weight: 400;
+    }
+
+    /* ── Traffic-light badge ─────────────────────────────────────────────── */
+    .tl-badge {
+      display: inline-block;
+      padding: .12rem .45rem;
+      border-radius: 12px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .tl-on-track     { background: #d5f5e3; color: #1a6b37; }
+    .tl-progress     { background: #fef9e7; color: #9a6c00; }
+    .tl-not-on-track { background: #fdecea; color: #922b21; }
+    .tl-no-data      { background: #f0f0f0; color: #888; }
+
+    /* ── System integration badges ───────────────────────────────────────── */
+    .si-yes         { background: #d5f5e3; color: #1a6b37; }
+    .si-no          { background: #fdecea; color: #922b21; }
+    .si-partially   { background: #fef9e7; color: #9a6c00; }
+    .si-na          { background: #f0f0f0; color: #999; font-style: italic; }
+
+    /* ── Map tab ─────────────────────────────────────────────────────────── */
+    #map-container { border-radius: var(--card-radius); overflow: hidden; }
+    #leaflet-map   { height: 520px; background: #daeeff; }
+    .map-legend {
+      background: #fff;
+      border: 1px solid #dde3ea;
+      border-radius: var(--card-radius);
+      padding: .75rem 1rem;
+      font-size: 0.78rem;
+    }
+    .legend-item { display: flex; align-items: center; gap: .5rem; margin: .2rem 0; }
+    .legend-swatch {
+      width: 16px; height: 16px;
+      border-radius: 3px;
+      border: 1px solid rgba(0,0,0,.1);
+      flex-shrink: 0;
+    }
+
+    /* ── Loading spinner ─────────────────────────────────────────────────── */
+    #loading-overlay {
+      position: fixed; inset: 0;
+      background: rgba(255,255,255,.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 9999;
+    }
+
+    /* ── Utilities ───────────────────────────────────────────────────────── */
+    .text-who { color: var(--who-blue); }
+    .small-note { font-size: 0.7rem; color: #999; }
+  </style>
+</head>
+<body>
+
+<!-- Loading overlay -->
+<div id="loading-overlay">
+  <div class="spinner-border text-primary mb-3" role="status" style="width:3rem;height:3rem;"></div>
+  <p class="text-muted">Loading dashboard data…</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- Header -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<header id="site-header">
+  <img id="espen-logo" class="header-logo" src="assets/ESPEN-Bleu.png" alt="ESPEN" />
+  <div class="header-divider"></div>
+  <div class="header-title">
+    <h1>PCT Progress Indicators — WHO African Region</h1>
+    <p>Preventive Chemotherapy NTD Programme &nbsp;|&nbsp; ESPEN–CIFF Collaboration</p>
+  </div>
+  <div class="header-divider"></div>
+  <img id="ciff-logo" class="header-logo" src="assets/CIFF.png" alt="CIFF" />
+</header>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- Navigation -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<nav id="main-nav">
+  <ul class="nav" id="dashTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-regional" type="button">
+        <i class="bi bi-globe-americas me-1"></i>WHO AFRO Region
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-lf" type="button">
+        <i class="bi bi-virus me-1"></i>Lymphatic Filariasis
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-oncho" type="button">
+        <i class="bi bi-virus me-1"></i>Onchocerciasis
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-sth" type="button">
+        <i class="bi bi-virus me-1"></i>STH
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-sch" type="button">
+        <i class="bi bi-virus me-1"></i>Schistosomiasis
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-tra" type="button">
+        <i class="bi bi-virus me-1"></i>Trachoma
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-map" type="button">
+        <i class="bi bi-map me-1"></i>Elimination Map
+      </button>
+    </li>
+  </ul>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- Tab content -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="tab-content">
+
+  <!-- ── Tab 1: Regional Overview ──────────────────────────────────────── -->
+  <div class="tab-pane fade show active" id="tab-regional" role="tabpanel">
+    <div class="tab-container">
+      <div class="filter-bar">
+        <label for="regional-year"><i class="bi bi-calendar3 me-1"></i>Year</label>
+        <select id="regional-year"></select>
+        <span class="small-note ms-2">Aggregated indicators for the 47 AFRO Member States. Population values displayed in thousands (×1,000).</span>
+      </div>
+      <div id="regional-content"></div>
+    </div>
+  </div>
+
+  <!-- ── Tabs 2–6: Disease-specific (generated by JS) ──────────────────── -->
+  <div class="tab-pane fade" id="tab-lf"    role="tabpanel"><div class="tab-container" id="body-lf"></div></div>
+  <div class="tab-pane fade" id="tab-oncho" role="tabpanel"><div class="tab-container" id="body-oncho"></div></div>
+  <div class="tab-pane fade" id="tab-sth"   role="tabpanel"><div class="tab-container" id="body-sth"></div></div>
+  <div class="tab-pane fade" id="tab-sch"   role="tabpanel"><div class="tab-container" id="body-sch"></div></div>
+  <div class="tab-pane fade" id="tab-tra"   role="tabpanel"><div class="tab-container" id="body-tra"></div></div>
+
+  <!-- ── Tab 7: Elimination Map ────────────────────────────────────────── -->
+  <div class="tab-pane fade" id="tab-map" role="tabpanel">
+    <div class="tab-container">
+      <div class="filter-bar">
+        <label for="map-indicator"><i class="bi bi-activity me-1"></i>Indicator</label>
+        <select id="map-indicator">
+          <option value="Indicator_36">Ind. 36 – ESPEN Performance Score: Lymphatic Filariasis</option>
+          <option value="Indicator_37">Ind. 37 – ESPEN Performance Score: Onchocerciasis</option>
+          <option value="Indicator_38">Ind. 38 – ESPEN Performance Score: STH</option>
+          <option value="Indicator_39">Ind. 39 – ESPEN Performance Score: Schistosomiasis</option>
+        </select>
+        <label for="map-year"><i class="bi bi-calendar3 me-1"></i>Year</label>
+        <select id="map-year"></select>
+        <span class="small-note ms-2">Country-level ESPEN Performance Scores (%) toward PC-NTD elimination.</span>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-lg-9">
+          <div class="section-card">
+            <div class="section-body p-0">
+              <div id="leaflet-map"></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3">
+          <div class="map-legend mb-3">
+            <div class="fw-bold mb-2" style="font-size:.8rem;">Performance Score</div>
+            <div class="legend-item"><div class="legend-swatch" style="background:#6BAED6;border-color:#6BAED6"></div><span>= 100% (Eliminated)</span></div>
+            <div class="legend-item"><div class="legend-swatch" style="background:#41AB5D;border-color:#41AB5D"></div><span>&gt; 75% – &lt; 100%</span></div>
+            <div class="legend-item"><div class="legend-swatch" style="background:#FEC44F;border-color:#FEC44F"></div><span>&gt; 50% – ≤ 75%</span></div>
+            <div class="legend-item"><div class="legend-swatch" style="background:#FE9929;border-color:#FE9929"></div><span>&gt; 25% – ≤ 50%</span></div>
+            <div class="legend-item"><div class="legend-swatch" style="background:#D7301F;border-color:#D7301F"></div><span>≤ 25%</span></div>
+            <div class="legend-item"><div class="legend-swatch" style="background:#ccc;border-color:#bbb"></div><span>N/A / Not endemic</span></div>
+          </div>
+          <div id="map-country-panel" class="map-legend">
+            <div class="fw-bold mb-1" style="font-size:.8rem;"><i class="bi bi-cursor me-1"></i>Country Details</div>
+            <div class="text-muted small-note">Hover over a country to see its score.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Score table below map -->
+      <div class="section-card mt-3">
+        <div class="section-head" style="background:var(--who-dark);">
+          <i class="bi bi-table"></i> Country Scores — <span id="map-table-title"></span>
+        </div>
+        <div class="section-body">
+          <table class="data-table" id="map-score-table">
+            <thead>
+              <tr>
+                <th>Country</th>
+                <th>Score (%)</th>
+                <th>Category</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /tab-content -->
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<!-- Scripts -->
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+
+<script>
+/* ════════════════════════════════════════════════════════════════════════
+   1. CONSTANTS
+   ════════════════════════════════════════════════════════════════════════ */
+
+/** Population-scale indicators: display value ÷ 1000 with unit label "×1,000" */
+const POP_INDICATORS = new Set([
+  'Indicator_1','Indicator_5','Indicator_6','Indicator_10',
+  'Indicator_13','Indicator_14','Indicator_17','Indicator_18',
+  'Indicator_21','Indicator_22'
+]);
+
+/** Percentage indicators: append % */
+const PCT_INDICATORS = new Set([
+  'Indicator_2','Indicator_4','Indicator_7','Indicator_9',
+  'Indicator_12','Indicator_16','Indicator_20',
+  'Indicator_23','Indicator_24','Indicator_25','Indicator_26','Indicator_27',
+  'Indicator_33','Indicator_36','Indicator_37','Indicator_38','Indicator_39'
+]);
+
+const DISEASE_CONFIG = {
+  lf: {
+    name: 'Lymphatic Filariasis', abbr: 'LF', color: 'var(--lf-color)',
+    indicators: ['Indicator_1','Indicator_2','Indicator_3','Indicator_4','Indicator_5','Indicator_23'],
+    dummyInd: 'Indicator_28',
+  },
+  oncho: {
+    name: 'Onchocerciasis', abbr: 'ONC', color: 'var(--oncho-color)',
+    indicators: ['Indicator_6','Indicator_7','Indicator_8','Indicator_9','Indicator_10','Indicator_24'],
+    dummyInd: 'Indicator_29',
+  },
+  sth: {
+    name: 'Soil-transmitted Helminthiases', abbr: 'STH', color: 'var(--sth-color)',
+    indicators: ['Indicator_11','Indicator_12','Indicator_13','Indicator_14','Indicator_25'],
+    dummyInd: 'Indicator_30',
+  },
+  sch: {
+    name: 'Schistosomiasis', abbr: 'SCH', color: 'var(--sch-color)',
+    indicators: ['Indicator_15','Indicator_16','Indicator_17','Indicator_18','Indicator_26'],
+    dummyInd: 'Indicator_31',
+  },
+  tra: {
+    name: 'Trachoma', abbr: 'TRA', color: 'var(--tra-color)',
+    indicators: ['Indicator_19','Indicator_20','Indicator_21','Indicator_22','Indicator_27'],
+    dummyInd: 'Indicator_32',
+  },
+};
+
+/** ISO 3166-1 numeric → ISO 3166-1 alpha-2 (for world-atlas GeoJSON feature IDs) */
+const ISO_NUM_TO_ALPHA2 = {
+  12:'DZ', 24:'AO', 204:'BJ', 72:'BW', 854:'BF', 108:'BI', 132:'CV',
+  120:'CM', 140:'CF', 148:'TD', 174:'KM', 178:'CG', 384:'CI', 180:'CD',
+  262:'DJ', 818:'EG', 226:'GQ', 232:'ER', 748:'SZ', 231:'ET', 266:'GA',
+  270:'GM', 288:'GH', 324:'GN', 624:'GW', 404:'KE', 426:'LS', 430:'LR',
+  450:'MG', 454:'MW', 466:'ML', 478:'MR', 480:'MU', 516:'NA', 562:'NE',
+  566:'NG', 646:'RW', 678:'ST', 686:'SN', 690:'SC', 694:'SL', 706:'SO',
+  710:'ZA', 728:'SS', 729:'SD', 834:'TZ', 768:'TG', 800:'UG', 887:'YE',
+  894:'ZM', 716:'ZW', 504:'MA', 434:'LY', 788:'TN',
+};
+
+/* ════════════════════════════════════════════════════════════════════════
+   2. GLOBAL DATA STORE
+   ════════════════════════════════════════════════════════════════════════ */
+let DATA = {
+  dictionaries: null,
+  afro: null,
+  country: null,
+  sysInteg: null,
+  countries: [],
+  years: [],
+};
+let leafletMap = null;
+let geoLayer   = null;
+let worldGeo   = null; // cached GeoJSON
+
+/* ════════════════════════════════════════════════════════════════════════
+   3. UTILITY FUNCTIONS
+   ════════════════════════════════════════════════════════════════════════ */
+
+function fmtVal(val, indicator, forceRaw = false) {
+  if (val === null || val === undefined || val === '') return '<span class="na-cell">N/A</span>';
+  if (forceRaw) return Number.isInteger(val) ? val.toLocaleString() : val.toFixed(2);
+  if (POP_INDICATORS.has(indicator)) {
+    const thousands = val / 1000;
+    return thousands < 1
+      ? `<1`
+      : thousands < 10
+        ? thousands.toFixed(1)
+        : Math.round(thousands).toLocaleString();
+  }
+  if (PCT_INDICATORS.has(indicator)) {
+    return `${parseFloat(val).toFixed(1)}%`;
+  }
+  if (Number.isInteger(val)) return val.toLocaleString();
+  return parseFloat(val) % 1 === 0 ? parseInt(val).toLocaleString() : parseFloat(val).toFixed(2);
+}
+
+function fmtUnit(indicator) {
+  if (POP_INDICATORS.has(indicator)) return '<span class="metric-unit">×1,000</span>';
+  if (PCT_INDICATORS.has(indicator)) return '';
+  return '';
+}
+
+function trafficLightBadge(val) {
+  if (!val) return '<span class="tl-badge tl-no-data">N/A</span>';
+  const v = String(val).toLowerCase();
+  if (v.includes('on track') && !v.includes('not')) return `<span class="tl-badge tl-on-track">${val}</span>`;
+  if (v.includes('progress'))   return `<span class="tl-badge tl-progress">${val}</span>`;
+  if (v.includes('not'))        return `<span class="tl-badge tl-not-on-track">${val}</span>`;
+  if (v.includes('no data'))    return `<span class="tl-badge tl-no-data">${val}</span>`;
+  return `<span class="tl-badge tl-no-data">${val}</span>`;
+}
+
+function siBadge(val) {
+  if (!val) return '<span class="tl-badge si-na">N/A</span>';
+  const v = String(val).toLowerCase();
+  if (v === 'yes')       return `<span class="tl-badge si-yes">Yes</span>`;
+  if (v === 'no')        return `<span class="tl-badge si-no">No</span>`;
+  if (v === 'partially') return `<span class="tl-badge si-partially">Partially</span>`;
+  return `<span class="tl-badge si-na">${val}</span>`;
+}
+
+function indicatorLabel(key, source = 'country') {
+  const d = source === 'afro'
+    ? DATA.dictionaries.afro[key]
+    : DATA.dictionaries.country[key];
+  return d || key.replace('Indicator_', 'Ind. ');
+}
+
+function shortLabel(key) {
+  return key.replace('Indicator_', 'Ind. ');
+}
+
+function getMapColor(score) {
+  if (score === null || score === undefined) return '#ccc';
+  if (score >= 100) return '#6BAED6';        // Blue  — eliminated
+  if (score > 75)   return '#41AB5D';        // Green — >75% <100%
+  if (score > 50)   return '#FEC44F';        // Yellow— >50% ≤75%
+  if (score > 25)   return '#FE9929';        // Orange— >25% ≤50%
+  return '#D7301F';                           // Red   — ≤25%
+}
+
+function mapCategory(score) {
+  if (score === null || score === undefined) return 'N/A';
+  if (score >= 100) return 'Eliminated (100%)';
+  if (score > 75)   return '> 75% – < 100%';
+  if (score > 50)   return '> 50% – ≤ 75%';
+  if (score > 25)   return '> 25% – ≤ 50%';
+  return '≤ 25%';
+}
+
+function populateSelect(id, values, labelFn) {
+  const sel = document.getElementById(id);
+  sel.innerHTML = '';
+  values.forEach(v => {
+    const o = document.createElement('option');
+    o.value = String(v);
+    o.textContent = labelFn ? labelFn(v) : String(v);
+    sel.appendChild(o);
+  });
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   4. DATA LOADING
+   ════════════════════════════════════════════════════════════════════════ */
+async function loadData() {
+  const [dicts, afro, country, si] = await Promise.all([
+    fetch('data/dictionaries.json').then(r => r.json()),
+    fetch('data/afro_indicators.json').then(r => r.json()),
+    fetch('data/country_indicators.json').then(r => r.json()),
+    fetch('data/system_integration.json').then(r => r.json()),
+  ]);
+  DATA.dictionaries = dicts;
+  DATA.afro         = afro;
+  DATA.country      = country;
+  DATA.sysInteg     = si;
+
+  // Derive lists
+  const yearSet     = new Set(country.map(r => r.Year));
+  DATA.years        = [...yearSet].sort((a,b) => b - a);   // descending (latest first)
+  const ctrySet     = new Set(country.filter(r => r.ADMIN0ISO2 !== 'TZ_Z').map(r => r.ADMIN0));
+  DATA.countries    = [...ctrySet].sort();
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   5. REGIONAL OVERVIEW TAB
+   ════════════════════════════════════════════════════════════════════════ */
+function buildRegionalTab() {
+  const sel = document.getElementById('regional-year');
+  // AFRO years ascending order for display but default to latest
+  const afroYears = DATA.afro[0]
+    ? Object.keys(DATA.afro[0]).filter(k => k !== 'indicator').sort((a,b) => b - a)
+    : [];
+  populateSelect('regional-year', afroYears);
+  sel.addEventListener('change', () => renderRegional(sel.value));
+  renderRegional(afroYears[0]);
+}
+
+function renderRegional(year) {
+  const y = String(year);
+  // Build lookup: indicator → value for that year
+  const lookup = {};
+  DATA.afro.forEach(r => { lookup[r.indicator] = r[y]; });
+
+  const groups = [
+    {
+      label: 'Lymphatic Filariasis', color: 'var(--lf-color)',
+      items: ['Indicator_1','Indicator_3','Indicator_5']
+    },
+    {
+      label: 'Onchocerciasis', color: 'var(--oncho-color)',
+      items: ['Indicator_6','Indicator_8','Indicator_10']
+    },
+    {
+      label: 'Soil-transmitted Helminthiases (STH)', color: 'var(--sth-color)',
+      items: ['Indicator_11','Indicator_13','Indicator_14']
+    },
+    {
+      label: 'Schistosomiasis', color: 'var(--sch-color)',
+      items: ['Indicator_15','Indicator_17','Indicator_18']
+    },
+    {
+      label: 'Trachoma', color: 'var(--tra-color)',
+      items: ['Indicator_19','Indicator_21','Indicator_22']
+    },
+    {
+      label: 'Programme Coverage & Elimination', color: 'var(--cc-color)',
+      items: ['Indicator_28','Indicator_29','Indicator_30','Indicator_31','Indicator_32','Indicator_35']
+    },
+  ];
+
+  let html = '';
+  groups.forEach(g => {
+    html += `
+      <div class="disease-section mb-3">
+        <div class="disease-section-title" style="background:${g.color};">${g.label}</div>
+        <div class="row g-2 mt-0">`;
+    g.items.forEach(ind => {
+      const raw  = lookup[ind];
+      const val  = fmtVal(raw, ind);
+      const unit = fmtUnit(ind);
+      const desc = indicatorLabel(ind, 'afro');
+      html += `
+          <div class="${g.items.length <= 3 ? 'col-md-4' : 'col-md-3 col-lg-2'}">
+            <div class="metric-card">
+              <div class="metric-label">${desc}</div>
+              <div class="metric-value" style="color:${g.color};">${val}</div>
+              ${unit}
+            </div>
+          </div>`;
+    });
+    html += `</div></div>`;
+  });
+
+  // Year-over-year trend chart for key indicators
+  html += `
+    <div class="section-card mt-3">
+      <div class="section-head" style="background:var(--who-dark);">
+        <i class="bi bi-graph-up"></i> Year-on-Year Trend — Total Population Receiving PC (×1,000)
+      </div>
+      <div class="section-body p-3">
+        <canvas id="afro-trend-chart" height="90"></canvas>
+      </div>
+    </div>`;
+
+  document.getElementById('regional-content').innerHTML = html;
+  renderAfroTrendChart();
+}
+
+function renderAfroTrendChart() {
+  const allYears = DATA.afro[0]
+    ? Object.keys(DATA.afro[0]).filter(k => k !== 'indicator').sort()
+    : [];
+
+  const indMap = {
+    'Indicator_5':  { label: 'LF',          color: '#1a5276' },
+    'Indicator_10': { label: 'Oncho',        color: '#196f3d' },
+    'Indicator_13': { label: 'STH',          color: '#7d6608' },
+    'Indicator_17': { label: 'SCH',          color: '#6e2f0c' },
+    'Indicator_21': { label: 'Trachoma',     color: '#6c3483' },
+  };
+
+  const datasets = [];
+  DATA.afro.forEach(row => {
+    const cfg = indMap[row.indicator];
+    if (!cfg) return;
+    datasets.push({
+      label: cfg.label,
+      data: allYears.map(y => row[y] != null ? Math.round(row[y] / 1000) : null),
+      borderColor: cfg.color,
+      backgroundColor: cfg.color + '22',
+      tension: 0.3,
+      pointRadius: 3,
+      fill: false,
+      spanGaps: true,
+    });
+  });
+
+  const ctx = document.getElementById('afro-trend-chart');
+  if (!ctx) return;
+  if (ctx._chartInstance) ctx._chartInstance.destroy();
+  ctx._chartInstance = new Chart(ctx, {
+    type: 'line',
+    data: { labels: allYears, datasets },
+    options: {
+      responsive: true,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { position: 'right', labels: { font: { size: 11 }, boxWidth: 12 } },
+        tooltip: {
+          callbacks: {
+            label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y != null ? ctx.parsed.y.toLocaleString() : 'N/A'}`
+          }
+        }
+      },
+      scales: {
+        x: { grid: { color: '#eee' }, ticks: { font: { size: 10 } } },
+        y: { grid: { color: '#eee' }, ticks: { font: { size: 10 } },
+             title: { display: true, text: 'Population (×1,000)', font: { size: 10 } } }
+      }
+    }
+  });
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   6. DISEASE TABS
+   ════════════════════════════════════════════════════════════════════════ */
+function buildDiseaseTab(id, cfg) {
+  const bodyEl = document.getElementById(`body-${id}`);
+
+  // ── Filter bar ─────────────────────────────────────────────────────────
+  const yearSelId    = `${id}-year`;
+  const countrySelId = `${id}-country`;
+
+  bodyEl.innerHTML = `
+    <div class="filter-bar">
+      <label for="${yearSelId}"><i class="bi bi-calendar3 me-1"></i>Year</label>
+      <select id="${yearSelId}"></select>
+      <label for="${countrySelId}"><i class="bi bi-geo-alt me-1"></i>Country</label>
+      <select id="${countrySelId}">
+        <option value="">All countries</option>
+      </select>
+      <span class="small-note ms-2">Population values in ×1,000 where applicable.</span>
+    </div>
+
+    <!-- Main disease indicators table -->
+    <div class="section-card" id="${id}-main-card">
+      <div class="section-head" style="background:${cfg.color};">
+        <i class="bi bi-table"></i> ${cfg.name} — Country-level Indicators
+      </div>
+      <div class="section-body" id="${id}-main-body"></div>
+    </div>
+
+    <!-- Cross-cutting indicators -->
+    <div class="section-card" id="${id}-cc-card">
+      <div class="section-head" style="background:var(--cc-color);">
+        <i class="bi bi-intersect"></i> Cross-cutting Indicators
+      </div>
+      <div class="section-body" id="${id}-cc-body"></div>
+    </div>
+
+    <!-- System integration -->
+    <div class="section-card" id="${id}-si-card">
+      <div class="section-head" style="background:#444;">
+        <i class="bi bi-clipboard-data"></i> NTD System Integration Indicators
+        <span class="fw-normal ms-2" style="font-size:0.72rem;opacity:.85;">(Data available for 2024 and 2025 only)</span>
+      </div>
+      <div class="section-body" id="${id}-si-body"></div>
+    </div>`;
+
+  // Populate selects
+  populateSelect(yearSelId, DATA.years);
+  const ctrySelect = document.getElementById(countrySelId);
+  DATA.countries.forEach(c => {
+    const o = document.createElement('option');
+    o.value = c; o.textContent = c;
+    ctrySelect.appendChild(o);
+  });
+
+  const refresh = () => {
+    const yr = document.getElementById(yearSelId).value;
+    const ct = document.getElementById(countrySelId).value;
+    renderDiseaseMain(id, cfg, yr, ct);
+    renderCrossCutting(id, yr, ct);
+    renderSysInteg(id, ct);
+  };
+  document.getElementById(yearSelId).addEventListener('change', refresh);
+  ctrySelect.addEventListener('change', refresh);
+  refresh();
+}
+
+function renderDiseaseMain(id, cfg, year, country) {
+  let rows = DATA.country.filter(r =>
+    r.Year === parseInt(year) &&
+    r.ADMIN0ISO2 !== 'TZ_Z'  // exclude Zanzibar separate row from disease tables (include via mainland)
+  );
+  if (country) rows = rows.filter(r => r.ADMIN0 === country);
+
+  const allInds = [...cfg.indicators];
+  const th = allInds.map(ind => {
+    const lbl = indicatorLabel(ind);
+    const unit = POP_INDICATORS.has(ind) ? '<span class="th-tooltip">×1,000</span>'
+               : PCT_INDICATORS.has(ind) ? '<span class="th-tooltip">%</span>'
+               : '';
+    return `<th title="${lbl}">${shortLabel(ind)}${unit}</th>`;
+  }).join('');
+
+  const tbodyRows = rows.map(r => {
+    const tds = allInds.map(ind => {
+      // Only show data if country is endemic (dummyInd == 1)
+      const endemic = cfg.dummyInd ? r[cfg.dummyInd] : 1;
+      const val = (endemic === 0 || endemic === null) && ind !== 'Indicator_33' && ind !== 'Indicator_35'
+        ? null  // Not endemic — show N/A
+        : r[ind];
+      return `<td>${fmtVal(val, ind)}</td>`;
+    }).join('');
+    return `<tr><td>${r.ADMIN0}</td>${tds}</tr>`;
+  }).join('');
+
+  const legendRow = allInds.map(ind =>
+    `<tr><td class="fw-600">${shortLabel(ind)}</td><td style="color:#555;">${indicatorLabel(ind)}</td></tr>`
+  ).join('');
+
+  document.getElementById(`${id}-main-body`).innerHTML = `
+    <div class="overflow-x-auto">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Country</th>${th}
+          </tr>
+        </thead>
+        <tbody>${tbodyRows || '<tr><td colspan="99" class="text-center text-muted py-3">No data for selection.</td></tr>'}</tbody>
+      </table>
+    </div>
+    <details class="p-2">
+      <summary class="small-note" style="cursor:pointer;">Indicator definitions</summary>
+      <table class="mt-2" style="font-size:.75rem;width:100%;">
+        ${legendRow}
+      </table>
+    </details>`;
+}
+
+function renderCrossCutting(id, year, country) {
+  let rows = DATA.country.filter(r =>
+    r.Year === parseInt(year) && r.ADMIN0ISO2 !== 'TZ_Z'
+  );
+  if (country) rows = rows.filter(r => r.ADMIN0 === country);
+
+  const ccInds = ['Indicator_33','Indicator_34','Indicator_35'];
+
+  const th = `
+    <th title="${indicatorLabel('Indicator_33')}">Ind. 33 — ITCI (%)</th>
+    <th>Ind. 34 — Band</th>
+    <th title="${indicatorLabel('Indicator_35')}">Ind. 35 — Eliminated PC-NTDs (n)</th>`;
+
+  const tbodyRows = rows.map(r => `
+    <tr>
+      <td>${r.ADMIN0}</td>
+      <td>${fmtVal(r.Indicator_33, 'Indicator_33')}</td>
+      <td>${trafficLightBadge(r.Indicator_34)}</td>
+      <td>${fmtVal(r.Indicator_35, 'Indicator_35')}</td>
+    </tr>`).join('');
+
+  document.getElementById(`${id}-cc-body`).innerHTML = `
+    <table class="data-table">
+      <thead><tr><th>Country</th>${th}</tr></thead>
+      <tbody>${tbodyRows || '<tr><td colspan="4" class="text-center text-muted py-3">No data for selection.</td></tr>'}</tbody>
+    </table>
+    <p class="small-note p-2 mb-0">
+      ITCI = Integrated Treatment Coverage Index. Band: On track (>75%), Progress but more effort required (25–75%), Not on track (&lt;25%).
+    </p>`;
+}
+
+function renderSysInteg(id, country) {
+  const qs = DATA.sysInteg.questions;
+  const siRows = DATA.sysInteg.data.filter(r => [2024, 2025].includes(r.Year));
+  const filtered = country ? siRows.filter(r => r.Country === country) : siRows;
+
+  // Pivot: country × year × Q
+  const byCountry = {};
+  filtered.forEach(r => {
+    if (!byCountry[r.Country]) byCountry[r.Country] = {};
+    byCountry[r.Country][r.Year] = r;
+  });
+
+  const countryNames = [...new Set(filtered.map(r => r.Country))].sort();
+
+  const ths2024 = qs.map(q => `<th>Q${q.q} (2024)</th>`).join('');
+  const ths2025 = qs.map(q => `<th>Q${q.q} (2025)</th>`).join('');
+
+  const tbodyRows = countryNames.map(cn => {
+    const r24 = byCountry[cn]?.[2024] || {};
+    const r25 = byCountry[cn]?.[2025] || {};
+    const tds24 = qs.map(q => `<td>${siBadge(r24[`Q${q.q}`])}</td>`).join('');
+    const tds25 = qs.map(q => `<td>${siBadge(r25[`Q${q.q}`])}</td>`).join('');
+    return `<tr><td>${cn}</td>${tds24}${tds25}</tr>`;
+  }).join('');
+
+  const qLegend = qs.map(q => `
+    <tr>
+      <td class="fw-600">Q${q.q}</td>
+      <td style="color:#555;">${q.text}</td>
+    </tr>`).join('');
+
+  document.getElementById(`${id}-si-body`).innerHTML = `
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th rowspan="2">Country</th>
+          <th colspan="${qs.length}" style="border-right:2px solid #ccc;background:#f5f5f5;">2024</th>
+          <th colspan="${qs.length}" style="background:#f5f5f5;">2025</th>
+        </tr>
+        <tr>${ths2024.replace(/\(2024\)/g,'').replace('<th>','<th style="border-right:2px solid #ccc;">')}${ths2025.replace(/\(2025\)/g,'')}</tr>
+      </thead>
+      <tbody>${tbodyRows || '<tr><td colspan="99" class="text-center text-muted py-3">No data for selection.</td></tr>'}</tbody>
+    </table>
+    <details class="p-2">
+      <summary class="small-note" style="cursor:pointer;">Question definitions</summary>
+      <table class="mt-2" style="font-size:.75rem;width:100%;">${qLegend}</table>
+    </details>`;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   7. MAP TAB
+   ════════════════════════════════════════════════════════════════════════ */
+function buildMapTab() {
+  const mapYears = [...new Set(
+    DATA.country
+      .filter(r => r.Indicator_36 !== null)
+      .map(r => r.Year)
+  )].sort((a,b) => b - a);
+  populateSelect('map-year', mapYears);
+
+  document.getElementById('map-indicator').addEventListener('change', refreshMap);
+  document.getElementById('map-year').addEventListener('change', refreshMap);
+
+  // Init Leaflet map
+  leafletMap = L.map('leaflet-map', {
+    center: [2, 22], zoom: 3,
+    maxZoom: 7, minZoom: 2,
+    zoomControl: true,
+  });
+
+  // Minimal tile layer (CartoDB light)
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+    attribution: '© OpenStreetMap contributors © CARTO',
+    subdomains: 'abcd', maxZoom: 19
+  }).addTo(leafletMap);
+
+  // Load world atlas and build Africa GeoJSON
+  fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
+    .then(r => r.json())
+    .then(world => {
+      const countries = topojson.feature(world, world.objects.countries);
+      // Keep only countries in our ISO mapping
+      const afroISO2Set = new Set(Object.values(ISO_NUM_TO_ALPHA2));
+      countries.features = countries.features.filter(f => {
+        const iso2 = ISO_NUM_TO_ALPHA2[parseInt(f.id)];
+        return afroISO2Set.has(iso2);
+      });
+      // Attach ISO2 to each feature for easy lookup
+      countries.features.forEach(f => {
+        f.properties.iso2 = ISO_NUM_TO_ALPHA2[parseInt(f.id)] || null;
+      });
+      worldGeo = countries;
+      refreshMap();
+    })
+    .catch(err => {
+      document.getElementById('leaflet-map').innerHTML =
+        '<div class="p-4 text-muted">Map data could not be loaded. Please ensure internet connectivity and reload.</div>';
+      console.error('GeoJSON load error:', err);
+    });
+}
+
+function getCountryScore(iso2, indicator, year) {
+  // Tanzania: use mainland (TZ) — exclude Zanzibar separate row
+  const rows = DATA.country.filter(r =>
+    r.ADMIN0ISO2 === iso2 &&
+    r.Year === parseInt(year) &&
+    r.ADMIN0ISO2 !== 'TZ_Z'
+  );
+  if (!rows.length) return null;
+  const val = rows[0][indicator];
+  return (val === null || val === undefined) ? null : parseFloat(val);
+}
+
+function refreshMap() {
+  if (!worldGeo || !leafletMap) return;
+  const indicator = document.getElementById('map-indicator').value;
+  const year      = document.getElementById('map-year').value;
+  const indLabel  = document.getElementById('map-indicator').options[
+    document.getElementById('map-indicator').selectedIndex
+  ].text;
+
+  document.getElementById('map-table-title').textContent = `${indLabel} — ${year}`;
+
+  // Remove previous layer
+  if (geoLayer) leafletMap.removeLayer(geoLayer);
+
+  geoLayer = L.geoJSON(worldGeo, {
+    style: feature => {
+      const score = getCountryScore(feature.properties.iso2, indicator, year);
+      return {
+        fillColor: getMapColor(score),
+        weight: 0.8,
+        color: '#fff',
+        fillOpacity: 0.85
+      };
+    },
+    onEachFeature: (feature, layer) => {
+      const iso2   = feature.properties.iso2;
+      const score  = getCountryScore(iso2, indicator, year);
+      const name   = DATA.country.find(r => r.ADMIN0ISO2 === iso2)?.ADMIN0 || iso2;
+      const cat    = mapCategory(score);
+      const disp   = score !== null ? `${score.toFixed(1)}%` : 'N/A';
+
+      layer.bindTooltip(`<strong>${name}</strong><br/>${disp}<br/><em>${cat}</em>`, {
+        sticky: true, opacity: .92
+      });
+
+      layer.on('mouseover', () => {
+        layer.setStyle({ weight: 2, color: '#333', fillOpacity: 0.95 });
+        document.getElementById('map-country-panel').innerHTML = `
+          <div class="fw-bold mb-1" style="font-size:.8rem;">${name}</div>
+          <div>Score: <strong>${disp}</strong></div>
+          <div>Category: ${cat}</div>`;
+      });
+      layer.on('mouseout', () => {
+        geoLayer.resetStyle(layer);
+        document.getElementById('map-country-panel').innerHTML = `
+          <div class="fw-bold mb-1" style="font-size:.8rem;"><i class="bi bi-cursor me-1"></i>Country Details</div>
+          <div class="text-muted small-note">Hover over a country to see its score.</div>`;
+      });
+    }
+  }).addTo(leafletMap);
+
+  // Populate score table
+  const rows = DATA.country
+    .filter(r => r.Year === parseInt(year) && r.ADMIN0ISO2 !== 'TZ_Z')
+    .map(r => ({ country: r.ADMIN0, score: r[indicator] }))
+    .filter(r => r.score !== null && r.score !== undefined)
+    .sort((a,b) => b.score - a.score);
+
+  const tbody = document.querySelector('#map-score-table tbody');
+  tbody.innerHTML = rows.map(r => {
+    const s = parseFloat(r.score);
+    const cat = mapCategory(s);
+    const color = getMapColor(s);
+    return `<tr>
+      <td>${r.country}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:.4rem;">
+          <div style="width:${Math.min(s,100)}%;max-width:120px;height:8px;background:${color};border-radius:4px;min-width:4px;"></div>
+          <span>${s.toFixed(1)}%</span>
+        </div>
+      </td>
+      <td>${cat}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   8. INITIALISATION
+   ════════════════════════════════════════════════════════════════════════ */
+async function init() {
+  try {
+    await loadData();
+
+    buildRegionalTab();
+    Object.entries(DISEASE_CONFIG).forEach(([id, cfg]) => buildDiseaseTab(id, cfg));
+
+    // Build map tab when its tab is first shown (to ensure Leaflet renders properly)
+    let mapBuilt = false;
+    document.querySelector('[data-bs-target="#tab-map"]').addEventListener('shown.bs.tab', () => {
+      if (!mapBuilt) { mapBuilt = true; buildMapTab(); }
+      if (leafletMap) leafletMap.invalidateSize();
+    });
+
+    document.getElementById('loading-overlay').style.display = 'none';
+
+  } catch (err) {
+    console.error('Dashboard init failed:', err);
+    document.getElementById('loading-overlay').innerHTML = `
+      <div class="alert alert-danger mx-3">
+        <strong>Error loading dashboard.</strong><br/>
+        Please serve this project via a web server (e.g. <code>python -m http.server</code> or GitHub Pages).<br/>
+        <small class="text-muted">${err.message}</small>
+      </div>`;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

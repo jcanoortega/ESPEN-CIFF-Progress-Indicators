@@ -1,0 +1,2 @@
+# Place source Excel files here when updating the dashboard data.
+# Run: python prepare_data.py --src-dir data-sources/ --out-dir data/
