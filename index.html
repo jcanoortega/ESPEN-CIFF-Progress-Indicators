@@ -551,8 +551,48 @@ function indicatorLabel(key, source = 'country') {
   return d || key.replace('Indicator_', 'Ind. ');
 }
 
+/** Concise column header labels for each indicator */
+const SHORT_LABELS = {
+  Indicator_1:  'Pop. no longer requiring MDA',
+  Indicator_2:  '% pop. no longer requiring MDA',
+  Indicator_3:  'IU stopped MDA',
+  Indicator_4:  '% IU stopped MDA',
+  Indicator_5:  'Pop. receiving PC',
+  Indicator_6:  'Pop. no longer requiring MDA',
+  Indicator_7:  '% pop. no longer requiring MDA',
+  Indicator_8:  'IU stopped MDA',
+  Indicator_9:  '% IU stopped MDA',
+  Indicator_10: 'Pop. receiving PC',
+  Indicator_11: 'IU stopped PC',
+  Indicator_12: '% IU stopped PC',
+  Indicator_13: 'Pop. receiving PC',
+  Indicator_14: 'SAC pop. receiving PC',
+  Indicator_15: 'IU stopped PC',
+  Indicator_16: '% IU stopped PC',
+  Indicator_17: 'Pop. receiving PC',
+  Indicator_18: 'SAC pop. receiving PC',
+  Indicator_19: 'IU stopped MDA',
+  Indicator_20: '% IU stopped MDA',
+  Indicator_21: 'Pop. receiving PC',
+  Indicator_22: 'Pop. benefitting from trichiasis surgery',
+  Indicator_23: 'Epidemiological coverage',
+  Indicator_24: 'Epidemiological coverage',
+  Indicator_25: 'Epidemiological coverage',
+  Indicator_26: 'Epidemiological coverage',
+  Indicator_27: 'Epidemiological coverage',
+  Indicator_33: 'Integrated Treatment Coverage Index (ITCI)',
+  Indicator_34: 'ITCI Band',
+  Indicator_35: 'Eliminated PC-NTDs (n)',
+  Indicator_36: 'ESPEN Performance Score',
+  Indicator_37: 'ESPEN Performance Score',
+  Indicator_38: 'ESPEN Performance Score',
+  Indicator_39: 'ESPEN Performance Score',
+};
+
 function shortLabel(key) {
-  return key.replace('Indicator_', 'Ind. ');
+  const label = SHORT_LABELS[key] || key.replace('Indicator_', 'Ind. ');
+  const num   = key.replace('Indicator_', '');
+  return `${label}<span class="th-tooltip">Ind. ${num}</span>`;
 }
 
 function getMapColor(score) {
@@ -873,9 +913,9 @@ function renderCrossCutting(id, year, country) {
   const ccInds = ['Indicator_33','Indicator_34','Indicator_35'];
 
   const th = `
-    <th title="${indicatorLabel('Indicator_33')}">Ind. 33 — ITCI (%)</th>
-    <th>Ind. 34 — Band</th>
-    <th title="${indicatorLabel('Indicator_35')}">Ind. 35 — Eliminated PC-NTDs (n)</th>`;
+    <th>Integrated Treatment Coverage Index (ITCI)<span class="th-tooltip">Ind. 33</span></th>
+    <th>ITCI Band<span class="th-tooltip">Ind. 34</span></th>
+    <th>Eliminated PC-NTDs (n)<span class="th-tooltip">Ind. 35</span></th>`;
 
   const tbodyRows = rows.map(r => `
     <tr>
@@ -909,8 +949,8 @@ function renderSysInteg(id, country) {
 
   const countryNames = [...new Set(filtered.map(r => r.Country))].sort();
 
-  const ths2024 = qs.map(q => `<th>Q${q.q} (2024)</th>`).join('');
-  const ths2025 = qs.map(q => `<th>Q${q.q} (2025)</th>`).join('');
+  const ths2024 = qs.map(q => `<th title="${q.text}">Q${q.q}<span class="th-tooltip">2024</span></th>`).join('');
+  const ths2025 = qs.map(q => `<th title="${q.text}">Q${q.q}<span class="th-tooltip">2025</span></th>`).join('');
 
   const tbodyRows = countryNames.map(cn => {
     const r24 = byCountry[cn]?.[2024] || {};
